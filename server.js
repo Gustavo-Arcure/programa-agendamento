@@ -7,7 +7,15 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// Criar pastas se não existirem
+// --- FUNÇÃO PARA PEGAR HORA DO BRASIL (CORRIGIDA PARA VERCEL) ---
+function getBrazilTime() {
+    const agora = new Date();
+    // A Vercel opera em UTC. Isso converte para a string do Brasil e cria um novo objeto de data.
+    const dataBrasilia = agora.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+    return new Date(dataBrasilia);
+}
+
+// Criar pastas (Nota: No Vercel, isso só funciona temporariamente na pasta /tmp)
 const folders = ["data", "public/uploads"];
 folders.forEach(f => { if (!fs.existsSync(f)) fs.mkdirSync(f, { recursive: true }); });
 
@@ -25,8 +33,7 @@ const read = (f) => {
 
 const write = (f, d) => fs.writeFileSync(path.join(__dirname, "data", f), JSON.stringify(d, null, 2));
 
-/* --- ROTAS DE SERVIÇOS (COM DELETE DE IMAGEM CORRIGIDO) --- */
-
+/* --- ROTAS DE SERVIÇOS --- */
 app.get("/api/services", (req, res) => res.json(read("services.json")));
 
 app.post("/api/services", upload.single("foto"), (req, res) => {
@@ -43,47 +50,39 @@ app.post("/api/services", upload.single("foto"), (req, res) => {
     res.json(novo);
 });
 
-app.delete("/api/services/:id", (req, res) => {
-    try {
-        const idParaRemover = req.params.id;
-        let services = read("services.json");
-        const servico = services.find(s => s.id == idParaRemover);
-
-        if (servico) {
-            // Tenta apagar a imagem física
-            if (servico.image && servico.image !== "/no-image.png") {
-                const caminhoImagem = path.join(__dirname, "public", servico.image);
-                if (fs.existsSync(caminhoImagem)) fs.unlinkSync(caminhoImagem);
-            }
-            // Filtra e salva
-            const novaLista = services.filter(s => s.id != idParaRemover);
-            write("services.json", novaLista);
-            return res.json({ success: true });
-        }
-        res.status(404).json({ success: false });
-    } catch (err) { res.status(500).json({ success: false }); }
-});
-
-/* --- ROTAS DE AGENDAMENTO --- */
-
+/* --- ROTA DE HORÁRIOS DISPONÍVEIS (TOTALMENTE CORRIGIDA) --- */
 app.get("/api/available-times", (req, res) => {
     const { date, duration } = req.query;
     const schedule = read("schedule.json");
     const appointments = read("appointments.json");
+    
     const config = schedule.dailyConfigs?.[date] || { open: "08:00", close: "20:00", blockedTimes: [], isDayClosed: false };
 
     if (config.isDayClosed) return res.json([]);
 
+    // Pegamos a hora exata do Brasil agora
+    const agoraBrasil = getBrazilTime();
+    
+    // Formatamos a data atual para YYYY-MM-DD comparável com a string 'date'
+    const ano = agoraBrasil.getFullYear();
+    const mes = String(agoraBrasil.getMonth() + 1).padStart(2, '0');
+    const dia = String(agoraBrasil.getDate()).padStart(2, '0');
+    const hojeDataString = `${ano}-${mes}-${dia}`;
+    
+    const horaAtualString = agoraBrasil.toTimeString().substring(0, 5);
+
     let times = [];
     let curr = new Date(`${date}T${config.open}:00`);
     let end = new Date(`${date}T${config.close}:00`);
-    const agora = new Date();
-    const hojeData = agora.toISOString().split('T')[0];
-    const horaAtual = agora.toTimeString().substring(0, 5);
 
     while (curr <= end) {
         const h = curr.toTimeString().substring(0, 5);
-        if (date !== hojeData || h > horaAtual) times.push(h);
+        
+        // Regra: Se for um dia depois de hoje, mostra tudo. 
+        // Se for hoje, só mostra se a hora do slot (h) for maior que a hora agora.
+        if (date > hojeDataString || (date === hojeDataString && h > horaAtualString)) {
+            times.push(h);
+        }
         curr.setMinutes(curr.getMinutes() + 20);
     }
 
@@ -95,7 +94,9 @@ app.get("/api/available-times", (req, res) => {
         if (bloqueados.includes(t)) return false;
         const inicio = new Date(`${date}T${t}:00`);
         const fim = new Date(inicio.getTime() + durSrv * 60000);
-        if (fim > new Date(`${date}T${config.close}:00`)) return false;
+        
+        const limiteFechamento = new Date(`${date}T${config.close}:00`);
+        if (fim > limiteFechamento) return false;
 
         return !ocupados.some(ap => {
             const apIn = new Date(`${date}T${ap.time}:00`);
@@ -106,6 +107,7 @@ app.get("/api/available-times", (req, res) => {
     res.json(livres);
 });
 
+// ... (Restante das rotas POST/DELETE permanecem iguais)
 app.post("/api/appointments", (req, res) => {
     const ap = read("appointments.json");
     ap.push({ ...req.body, id: Date.now() });
@@ -128,7 +130,6 @@ app.delete("/api/appointments/:id", (req, res) => {
     res.json({ success: true });
 });
 
-// Rotas Administrativas (Get/Save Schedule e Appointments por data)
 app.get("/api/admin/get-schedule", (req, res) => {
     const schedule = read("schedule.json");
     res.json(schedule.dailyConfigs?.[req.query.date] || { blockedTimes: [], isDayClosed: false, open: "08:00", close: "20:00" });
@@ -146,4 +147,5 @@ app.get("/api/admin/appointments", (req, res) => {
     res.json(read("appointments.json").filter(a => a.date === req.query.date));
 });
 
-app.listen(3000, () => console.log("Servidor em http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
