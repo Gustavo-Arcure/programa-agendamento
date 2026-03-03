@@ -5,7 +5,7 @@ body
     color: #333;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 20px;
-    width: 80%;
+    width: 95%;
     max-width: 800px;
     margin: auto;
 }
@@ -282,4 +282,5 @@ button:hover {
     font-style: italic;
     font-size: 0.8rem;
     letter-spacing: 1px;
+
 }
