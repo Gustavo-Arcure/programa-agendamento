@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1772247326286,
+    "name": "",
+    "phone": "",
+    "service": "jhjh",
+    "duration": 20,
+    "date": "2026-03-04",
+    "time": "08:00"
+  },
+  {
+    "name": "Gugu",
+    "phone": "(11) 9 4945-0966",
+    "date": "2026-03-03",
+    "time": "16:00",
+    "duration": 20,
+    "service": "Corte Simples",
+    "id": 1772561259898
+  },
+  {
+    "name": "Francisca",
+    "phone": "(11) 9 4945-0966",
+    "date": "2026-03-03",
+    "time": "15:20",
+    "duration": 40,
+    "service": "Topete",
+    "id": 1772561960231
+  }
+]

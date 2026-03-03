@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1772561246636,
+    "title": "Corte Simples",
+    "price": "30,00",
+    "duration": 20,
+    "image": "/uploads/1772561246626.jpg"
+  },
+  {
+    "id": 1772561789049,
+    "title": "Topete",
+    "price": "50",
+    "duration": 40,
+    "image": "/uploads/1772561789046.jfif"
+  },
+  {
+    "id": 1772561832930,
+    "title": "Barba",
+    "price": "30",
+    "duration": 20,
+    "image": "/uploads/1772561832924.avif"
+  },
+  {
+    "id": 1772561875817,
+    "title": "Luzes",
+    "price": "80",
+    "duration": 60,
+    "image": "/uploads/1772561875812.jfif"
+  }
+]
