@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Gestão</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="admh">Painel do Barbeiro</h1>
+
+    <div class="box">
+        <h2>Clientes do Dia</h2>
+        <div id="agenda"></div>
+    </div>
+
+    <div class="box">
+        <h2>Agenda Diária</h2>
+        <label>Selecionar Data:</label>
+        <input type="date" id="agendaDate">
+        <div style="display:flex; gap:10px;">
+            <button id="btnFechar" onclick="bloquearDia()">🚫 Fechar Dia</button>
+            <button onclick="configurarHorarioDia()" class="btn-secundario">⚙️ Abertura/Fechamento</button>
+        </div>
+        <h3>Bloquear Horários Individuais</h3>
+        <div id="gradeHorarios"></div>
+    </div>
+
+
+<div class="box">
+    <h2>Lista de Serviços</h2>
+    <div id="listaServicosAdmin">
+        </div>
+</div>
+
+
+
+    <div class="box">
+        <h2>Adicionar Novo Serviço</h2>
+        <input id="title" placeholder="Nome do Corte">
+        <input id="price" placeholder="Preço">
+        <select id="duration">
+            <option value="20">20 min</option>
+            <option value="40">40 min</option>
+            <option value="60">1 hora</option>
+            <option value="80">1h 20min</option>
+        </select>
+        <label>Foto do Trabalho:</label>
+        <input type="file" id="foto" accept="image/*">
+        <button onclick="addService()">Salvar Serviço</button>
+    </div>
+
+
+<button src="admin.html">Pagina do cliente</button>
+
+
+        <p class="foot">2026. Todos os direitos reservados.<br>gustavo.arcure@outlook.com</p>
+
+
+    <script src="admin.js"></script>
+</body>
+</html>
